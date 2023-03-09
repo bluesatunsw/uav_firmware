@@ -1,2 +1,2 @@
-# v0_uav_firmware
+# UAV Firmware V0
 The UAV Firmare for V0
