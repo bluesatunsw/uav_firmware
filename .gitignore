@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# C Project
+CMakeFiles/
+
+# Python
+__pycache__
