@@ -260,7 +260,7 @@ class ChannelPacket:
             
         return ChannelPacket(*diff)
     
-    def get_changes(self, prev) -> list:
+    def get_changes_with(self, prev) -> list:
         changes = []
         
         for channel in (prev - self):
@@ -309,8 +309,10 @@ def serial_loop(ser: Serial):
     while True:
         data = read_data(ser)
         
-        for change in data.get_changes(prev):
+        for change in data.get_changes_with(prev):
             print(f'Changes {change.name} to {change}')
+            
+           prev = data
     
 
 def read_data(ser: Serial) -> ChannelPacket:
