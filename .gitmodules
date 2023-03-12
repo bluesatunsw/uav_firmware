@@ -1,0 +1,3 @@
+[submodule "lib/PPM"]
+	path = lib/PPM
+	url = https://github.com/Lynxmotion/Arduino-PPM.git

@@ -34,7 +34,7 @@
  */
 
 // Include the PPM library
-#include "ppm.h"
+#include "src/ppm.h"
 #include <stdlib.h>
 #include <Arduino.h>
 // #include <ArduinoJson.h>
