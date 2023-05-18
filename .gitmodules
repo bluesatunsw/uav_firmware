@@ -1,3 +1,9 @@
 [submodule "lib/PPM"]
 	path = lib/PPM
 	url = https://github.com/Lynxmotion/Arduino-PPM.git
+[submodule "lib/pico-sdk"]
+	path = lib/pico-sdk
+	url = https://github.com/raspberrypi/pico-sdk.git
+[submodule "examples/pico-examples"]
+	path = examples/pico-examples
+	url = https://github.com/raspberrypi/pico-examples.git
