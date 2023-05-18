@@ -31,8 +31,15 @@
 *.out
 *.app
 
+# IDE
+.vscode/
+
 # C Project
 CMakeFiles/
 
 # Python
 __pycache__
+
+# Ignore build directory contents but keep the .gitkeep file
+build/*
+!build/.gitkeep
