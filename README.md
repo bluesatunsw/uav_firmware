@@ -8,10 +8,8 @@ The Preliminary UAV Firmare
 
 ### Building Project
 The binaries compile into the `./build` directory.
-For first time setup, run:
+Run:
 ```
-cd ./build
-./initial_build.sh
+./build.sh
 ```
-F
 
