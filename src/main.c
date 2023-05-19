@@ -1,4 +1,5 @@
 // Includes
+#include <FreeRTOS.h>
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
@@ -11,23 +12,45 @@
 
 // Function Prototypes
 void initialise();
-void loop();
+
+
+/*
+ * Basic Tasks
+ */
+void led_task() {
+    // Initialise Pins
+    gpio_init(LED_PIN);
+    gpio_set_dir(LED_PIN, GPIO_OUT);
+
+    while (true) {
+        gpio_put(LED_PIN, 0);
+        vTaskDelay(50);
+
+        gpio_put(LED_PIN, 1);
+        puts("Bluesat UAV Flight Controller Says: 'Hello World!'\n");
+        vTaskDelay(100);
+    }
+}
 
 /*
  * Main function
-*/
+ */
 int main() {
     initialise();
     
-    while (1) {
-        loop();
-    }
+    // Create Tasks
+    xTaskCreate(led_task, "LED Task", 128, NULL, 1, NULL);
+    vTaskStartScheduler();
+
+    // Infinite loop - Program will never get to here in execution
+    // as FreeRTOS is running from `vTaskStartScheduler()`
+    while (true) {};
 }
 
 
 /*
  * Initialises the board
-*/
+ */
 void initialise() {
     // Used for debugging?
     bi_decl(bi_program_description("This is a test binary."));
@@ -35,21 +58,4 @@ void initialise() {
 
     // Initialises the RP2040 standard io library for serial coms
     stdio_init_all();
-
-    // Initialise Pins
-    gpio_init(LED_PIN);
-    gpio_set_dir(LED_PIN, GPIO_OUT);
-}
-
-
-/*
- * Main loop
-*/
-void loop() {
-    gpio_put(LED_PIN, 0);
-    sleep_ms(250);
-
-    gpio_put(LED_PIN, 1);
-    puts("Bluesat UAV Flight Controller Says: 'Hello World'\n");
-    sleep_ms(1000);
 }

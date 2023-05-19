@@ -7,3 +7,6 @@
 [submodule "examples/pico-examples"]
 	path = examples/pico-examples
 	url = https://github.com/raspberrypi/pico-examples.git
+[submodule "lib/FreeRTOS"]
+	path = lib/FreeRTOS
+	url = https://github.com/FreeRTOS/FreeRTOS-Kernel.git
