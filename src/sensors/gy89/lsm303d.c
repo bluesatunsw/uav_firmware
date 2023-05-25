@@ -85,18 +85,24 @@ int init_lsm303d() {
         return 0;
     }
 
-    write_lsm303d_reg(CTRL2, _u(0b00000000), true);
-    write_lsm303d_reg(CTRL1, _u(0x57), true);
-    write_lsm303d_reg(CTRL5, _u(0x64), true);
-    write_lsm303d_reg(CTRL6, _u(0x20), true);
-    write_lsm303d_reg(CTRL7, _u(0x00), false);
+    // 50Hz, Continuous Data Reg Update, XYZ Enabled
+    write_lsm303d_reg(CTRL1, _u(0b01010111), true);
+    // xx001xxxx -> +- 4g res for accelerometer
+    write_lsm303d_reg(CTRL2, _u(0b00001000), true);
+    // Temp enabled, Mag High Res @ 50Hz, 
+    write_lsm303d_reg(CTRL5, _u(0b11100100), true);
+    // +-4 gauss res for magnetometer
+    write_lsm303d_reg(CTRL6, _u(0b00100000), true);
+    // High / Low pass filters -> not enabled
+    write_lsm303d_reg(CTRL7, _u(0b00000000), false);
 
     return 1;
 }
 
 
 static float raw_to_ms2(int16_t raw) {
-    return raw * 0.061 / 1000 * 9.81;
+    // +- 4g range -> 0.122 mg/LSB
+    return raw * 0.122 / 1000 * 9.81;
 }
 
 
