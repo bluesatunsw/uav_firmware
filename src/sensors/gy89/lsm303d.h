@@ -2,15 +2,25 @@
 #define LSM303D_H
 
 
-typedef struct acceleration {
+// Acceleration, Measured in m/s2
+typedef struct accelerometer {
     float x;
     float y;
     float z;
-} Acceleration;
+} Accelerometer;
+
+
+// Magnetometer, Measured in Gauss
+typedef struct magnetometer {
+    float x;
+    float y;
+    float z;
+} Magnetometer;
 
 
 int init_lsm303d();
-Acceleration read_acceleration();
+Accelerometer read_acceleration();
+Magnetometer read_magnetometer();
 
 
 #endif

@@ -18,14 +18,20 @@ void imu_logger_task() {
     // Initialise + Config the LSM303D
     init_lsm303d();
 
+    Accelerometer acc;
+    Magnetometer mag;
+
     // Main Loop
     while (true) {
-        Acceleration acc = read_acceleration();
+        acc = read_acceleration();
+        mag = read_magnetometer();
 
-        // Display Acc Data
+        // Display Acc and Mag Data
         printf("Acc: (x: %2.2f, y: %2.2f, z: %2.2f)\n", acc.x, acc.y, acc.z);
+        printf("Mag: (x: %2.2f, y: %2.2f, z: %2.2f)\n", mag.x, mag.y, mag.z);
+        printf("--------------------\n");
 
-        task_delay_ms(150);
+        task_delay_ms(200);
     }
 }
 

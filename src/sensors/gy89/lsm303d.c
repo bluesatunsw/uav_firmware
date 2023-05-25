@@ -68,6 +68,7 @@ const uint8_t OUT_Z_H_M      = 0x0D;
 // Continuous Reading
 // Set leading bit to 1
 const uint8_t ACC_XYZ_START  = OUT_X_L_A | 0b10000000;
+const uint8_t MAG_XYZ_START  = OUT_X_L_M | 0b10000000;
 
 
 static void write_lsm303d_reg(uint8_t reg, uint8_t value, bool nostop) {
@@ -90,7 +91,7 @@ int init_lsm303d() {
     // xx001xxxx -> +- 4g res for accelerometer
     write_lsm303d_reg(CTRL2, _u(0b00001000), true);
     // Temp enabled, Mag High Res @ 50Hz, 
-    write_lsm303d_reg(CTRL5, _u(0b11100100), true);
+    write_lsm303d_reg(CTRL5, _u(0b11110000), true);
     // +-4 gauss res for magnetometer
     write_lsm303d_reg(CTRL6, _u(0b00100000), true);
     // High / Low pass filters -> not enabled
@@ -106,7 +107,7 @@ static float raw_to_ms2(int16_t raw) {
 }
 
 
-Acceleration read_acceleration() {
+Accelerometer read_acceleration() {
     int16_t raw_x, raw_y, raw_z;
     uint8_t buff[6];
 
@@ -117,11 +118,38 @@ Acceleration read_acceleration() {
     raw_y = (int16_t)(buff[3] << 8 | buff[2]);
     raw_z = (int16_t)(buff[5] << 8 | buff[4]);
     
-    Acceleration acc = {
+    Accelerometer acc = {
         raw_to_ms2(raw_x),
         raw_to_ms2(raw_y),
         raw_to_ms2(raw_z)
     };
 
     return acc;
+}
+
+
+static float raw_to_gauss(int16_t raw) {
+    // +- 4 gauss range -> 0.16 mg/LSB
+    return raw * 0.16 / 1000;
+}
+
+
+Magnetometer read_magnetometer() {
+    int16_t raw_x, raw_y, raw_z;
+    uint8_t buff[6];
+
+    i2c_write_blocking(I2C_PORT, LSM303D_ADDR, &MAG_XYZ_START, 1, true);
+    i2c_read_blocking(I2C_PORT, LSM303D_ADDR, buff, 6, false);
+
+    raw_x = (int16_t)(buff[1] << 8 | buff[0]);
+    raw_y = (int16_t)(buff[3] << 8 | buff[2]);
+    raw_z = (int16_t)(buff[5] << 8 | buff[4]);
+    
+    Magnetometer mag = {
+        raw_to_gauss(raw_x),
+        raw_to_gauss(raw_y),
+        raw_to_gauss(raw_z)
+    };
+
+    return mag;
 }
