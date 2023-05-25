@@ -31,6 +31,9 @@ target_include_directories(freertos PUBLIC
     ${PICO_SDK_FREERTOS_SOURCE}/portable/GCC/ARM_CM0
 )
 
+# Include Header Files
+include_directories(include)
+
 # Inclue the Source Files
 # add_subdirectory(freertos)
 add_subdirectory(src)
