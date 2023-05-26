@@ -4,6 +4,8 @@ add_library(
     imu.h
     gy89/lsm303d.c
     gy89/lsm303d.h
+    gy89/l3gd20.c
+    gy89/l3gd20.h
 )
 
 target_link_libraries(sensors pico_stdlib hardware_i2c freertos common)
