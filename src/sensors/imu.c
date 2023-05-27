@@ -6,12 +6,13 @@
 #include "common.h"
 #include "gy89/lsm303d.h"
 #include "gy89/l3gd20.h"
-
+#include "gy89/bmp180.h"
 
 static void get_aggregated_data(
     Accelerometer *acc,
     Magnetometer *mag,
     Gyroscope *gyro,
+    Barometer *baro,
     uint16_t display_rate,
     uint8_t aggregate_count
 );
@@ -29,22 +30,26 @@ void imu_logger_task() {
     gpio_pull_up(SDA_PIN);
     gpio_pull_up(SCL_PIN);
 
+
     // Initialise + Config the LSM303D
     while (!init_lsm303d()) {printf("LSM303D Init Failed\n"); task_delay_ms(100);}
     while (!init_l3gd20())  {printf("L3GD20 Init Failed\n");  task_delay_ms(100);}
+    while (!bmp180_init()) {printf("BMP180 Init Failed\n"); task_delay_ms(100);}
 
     Accelerometer acc;
     Magnetometer mag;
     Gyroscope gyro;
+    Barometer baro;
 
     // Main Loop
     while (true) {
-        get_aggregated_data(&acc, &mag, &gyro, display_rate, aggregate_count);
+        get_aggregated_data(&acc, &mag, &gyro, &baro, display_rate, aggregate_count);
 
         // Display Acc and Mag Data
         printf("Acc:  (x: %2.2f, y: %2.2f, z: %2.2f)\n", acc.x, acc.y, acc.z);
         printf("Mag:  (x: %2.2f, y: %2.2f, z: %2.2f)\n", mag.x, mag.y, mag.z);
         printf("Gyro: (x: %2.2f, y: %2.2f, z: %2.2f)\n", gyro.x, gyro.y, gyro.z);
+        printf("Baro: (Temp: %2.2f, Pressure: %2.2f, Altitude: %2.2f)\n", baro.temp, baro.pressure, baro.altitude);
         printf("--------------------\n");
     }
 }
@@ -54,6 +59,7 @@ static void get_aggregated_data(
     Accelerometer *acc,
     Magnetometer *mag,
     Gyroscope *gyro,
+    Barometer *baro,
     uint16_t display_rate,
     uint8_t aggregate_count
 ) {
@@ -61,6 +67,7 @@ static void get_aggregated_data(
     float acc_sums[3]  = {0, 0, 0};
     float mag_sums[3]  = {0, 0, 0};
     float gyro_sums[3] = {0, 0, 0};
+    float baro_sums[3] = {0, 0, 0};
 
     uint8_t time_delay = display_rate / aggregate_count;
 
@@ -68,6 +75,7 @@ static void get_aggregated_data(
     Accelerometer curr_acc;
     Magnetometer  curr_mag;
     Gyroscope     curr_gyro;
+    Barometer     curr_baro;
 
     for (uint8_t i = 0; i < aggregate_count; i++) {
         curr_acc  = read_acceleration();
@@ -85,6 +93,11 @@ static void get_aggregated_data(
         gyro_sums[1] += curr_gyro.y;
         gyro_sums[2] += curr_gyro.z;
 
+        curr_baro = read_barometer();
+        baro_sums[0] += curr_baro.temp;
+        baro_sums[1] += curr_baro.pressure;
+        baro_sums[2] += curr_baro.altitude;
+
         task_delay_ms(time_delay);
     }
 
@@ -98,4 +111,7 @@ static void get_aggregated_data(
     gyro->x = gyro_sums[0] / aggregate_count;
     gyro->y = gyro_sums[1] / aggregate_count;
     gyro->z = gyro_sums[2] / aggregate_count;
+    baro->temp = baro_sums[0] / aggregate_count;
+    baro->pressure = baro_sums[1] / aggregate_count;
+    baro->altitude = baro_sums[2] / aggregate_count;
 }

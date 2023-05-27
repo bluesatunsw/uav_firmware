@@ -6,6 +6,8 @@ add_library(
     gy89/lsm303d.h
     gy89/l3gd20.c
     gy89/l3gd20.h
+    gy89/bmp180.c
+    gy89/bmp180.h
 )
 
 target_link_libraries(sensors pico_stdlib hardware_i2c freertos common)

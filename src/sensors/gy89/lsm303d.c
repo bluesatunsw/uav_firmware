@@ -79,7 +79,7 @@ int init_lsm303d() {
     // Check the who am I register
     uint8_t data[1];
     i2c_write_blocking(I2C_PORT, LSM303D_ADDR, &WHO_AM_I, 1, true);
-    i2c_read_blocking(I2C_PORT, LSM303D_ADDR, &data, 1, false);
+    i2c_read_blocking(I2C_PORT, LSM303D_ADDR, data, 1, false);
 
     if (data[0] != LSM303D_ID) {
         return 0;
