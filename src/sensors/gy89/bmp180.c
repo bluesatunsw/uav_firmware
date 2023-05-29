@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #define       BMP180_ID       0x55
-static const uint8_t LSM303D_ADDR   = 0x77;
+static const uint8_t BMP180_ADDR   = 0x77;
 
 static const uint8_t CALIB       = 0xAA; // Starting address of calib data
 static const uint8_t CTRL_MEAS   = 0xF4; // Measurement Control
@@ -16,6 +16,9 @@ static const uint8_t PRES_ADDR   = 0x34; // Pressure, OSS = 0, ultra-low power m
                                   // set to 0x74 for standard mode
 static const uint8_t ID_REG      = 0xD0; // Contains device id
 static const uint8_t CHIP_ID     = 0x55; // Chip ID in ID_REG
+
+static const uint8_t OSS              = 0; // Oversampling ratio for pressure measurement
+static const uint8_t CONVERSION_DELAY = 4.5; // ms
 
 // Calibration Coefficients from EEPROM
 typedef struct {
@@ -33,18 +36,8 @@ typedef struct {
     int32_t b5;
 } bmp180_calib_coeffs_t;
 
-static void write_lsm303d_reg(uint8_t reg, uint8_t data, bool nostop) {
-    uint8_t buf[2] = {reg, data};
-    i2c_write_blocking(I2C_PORT, LSM303D_ADDR, buf, 2, nostop);
-}
-
-
-const short   OSS            = 0;
-const short CONVERSION_DELAY = 4.5; // ms
-
-static uint8_t ADDR = 0x77;
-
 /*
+    Combine 2 8-bit ints to a 16-bit int
 */
 static int16_t eight_to_sixteen(int8_t val1, int8_t val2) {
     return ((val1 << 8) + val2);
@@ -79,12 +72,15 @@ static void set_calibration_constants(bmp180_calib_coeffs_t *calib_coeffs, uint8
     calib_coeffs->md = eight_to_sixteen(reg_vals[20], reg_vals[21]);
 }
 
+/*
+    Get the calibration constants from the EEPROM
+*/
 static void bmp180_get_cal_param(bmp180_calib_coeffs_t *calib_coeffs) {
     uint8_t calib_data[22]; // 22, because there are 11 words of length 2 bytes
 
     // Read in calibration constants
-    i2c_write_blocking(I2C_PORT, ADDR, &CALIB, 1, true);
-    i2c_read_blocking(I2C_PORT, ADDR, calib_data, 22, false);
+    i2c_write_blocking(I2C_PORT, BMP180_ADDR, &CALIB, 1, true);
+    i2c_read_blocking(I2C_PORT, BMP180_ADDR, calib_data, 22, false);
 
     sleep_ms(CONVERSION_DELAY);
 
@@ -103,15 +99,15 @@ static int32_t bmp180_get_raw_temp() {
         CTRL_MEAS,
         TEMP_ADDR
     };
-    i2c_write_blocking(I2C_PORT, ADDR, temp_reg, 2, false);
+    i2c_write_blocking(I2C_PORT, BMP180_ADDR, temp_reg, 2, false);
 
     // Wait for CONVERSION_DELAYms
     sleep_ms(CONVERSION_DELAY);
 
     // Read the data from the register
     // Read 2 bytes (i.e. MSB and LSB) starting from register 0xF6
-    i2c_write_blocking(I2C_PORT, ADDR, &MSB, 1, true);
-    i2c_read_blocking(I2C_PORT, ADDR, temp_data, 2, false); 
+    i2c_write_blocking(I2C_PORT, BMP180_ADDR, &MSB, 1, true);
+    i2c_read_blocking(I2C_PORT, BMP180_ADDR, temp_data, 2, false); 
 
     // Combine MSB and LSB
     return (temp_data[0] << 8) + temp_data[1];
@@ -128,15 +124,15 @@ static int32_t bmp180_get_raw_pressure() {
         CTRL_MEAS,
         PRES_ADDR + (OSS << 6)
     };
-    i2c_write_blocking(I2C_PORT, ADDR, pressure_reg, 2, false);
+    i2c_write_blocking(I2C_PORT, BMP180_ADDR, pressure_reg, 2, false);
 
     // Wait for CONVERSION_DELAYms
     sleep_ms(CONVERSION_DELAY);
 
     // Read the data from the register
     // Read 3 bytes (i.e. MSB, LSB and XLSB) starting from register 0xF6
-    i2c_write_blocking(I2C_PORT, ADDR, &MSB, 1, true);
-    i2c_read_blocking(I2C_PORT, ADDR, pressure_data, 3, false);
+    i2c_write_blocking(I2C_PORT, BMP180_ADDR, &MSB, 1, true);
+    i2c_read_blocking(I2C_PORT, BMP180_ADDR, pressure_data, 3, false);
 
     // Math found in datasheet
     return ((pressure_data[0] << 16) + (pressure_data[1] << 8) + pressure_data[2]) >> (8 - OSS);
@@ -207,8 +203,8 @@ int bmp180_init() {
     // Write to and read from chip id register
     // Used to test communication is functioning
     uint8_t chipID[1];
-    i2c_write_blocking(I2C_PORT, ADDR, &ID_REG, 1, true);
-    i2c_read_blocking(I2C_PORT, ADDR, chipID, 1, false);
+    i2c_write_blocking(I2C_PORT, BMP180_ADDR, &ID_REG, 1, true);
+    i2c_read_blocking(I2C_PORT, BMP180_ADDR, chipID, 1, false);
     if (chipID[0] != CHIP_ID) {
         return 0;
     } else {
