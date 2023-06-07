@@ -6,6 +6,9 @@
 if (DEFINED ENV{PICO_SDK_PATH} AND (NOT PICO_SDK_PATH))
     set(PICO_SDK_PATH $ENV{PICO_SDK_PATH})
     message("Using PICO_SDK_PATH from environment ('${PICO_SDK_PATH}')")
+else ()
+    set(PICO_SDK_PATH ./../lib/pico-sdk)  # Directory from inside /build
+    message("Using PICO_SDK_PATH from local lib ('${PICO_SDK_PATH}')")
 endif ()
 
 if (DEFINED ENV{PICO_SDK_FETCH_FROM_GIT} AND (NOT PICO_SDK_FETCH_FROM_GIT))

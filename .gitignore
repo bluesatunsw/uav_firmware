@@ -41,5 +41,5 @@ CMakeFiles/
 __pycache__
 
 # Ignore build directory contents but keep the .gitkeep file
-build/*
-!build/.gitkeep
+/build/*
+!/build/.gitkeep
