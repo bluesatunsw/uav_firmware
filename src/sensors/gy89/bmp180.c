@@ -82,7 +82,7 @@ static void bmp180_get_cal_param(bmp180_calib_coeffs_t *calib_coeffs) {
     i2c_write_blocking(I2C_PORT, BMP180_ADDR, &CALIB, 1, true);
     i2c_read_blocking(I2C_PORT, BMP180_ADDR, calib_data, 22, false);
 
-    sleep_ms(CONVERSION_DELAY);
+    task_delay_ms(CONVERSION_DELAY);
 
     // Create struct to hold calibration data
     set_calibration_constants(calib_coeffs, calib_data);
@@ -102,7 +102,7 @@ static int32_t bmp180_get_raw_temp() {
     i2c_write_blocking(I2C_PORT, BMP180_ADDR, temp_reg, 2, false);
 
     // Wait for CONVERSION_DELAYms
-    sleep_ms(CONVERSION_DELAY);
+    task_delay_ms(CONVERSION_DELAY);
 
     // Read the data from the register
     // Read 2 bytes (i.e. MSB and LSB) starting from register 0xF6
@@ -127,7 +127,7 @@ static int32_t bmp180_get_raw_pressure() {
     i2c_write_blocking(I2C_PORT, BMP180_ADDR, pressure_reg, 2, false);
 
     // Wait for CONVERSION_DELAYms
-    sleep_ms(CONVERSION_DELAY);
+    task_delay_ms(CONVERSION_DELAY);
 
     // Read the data from the register
     // Read 3 bytes (i.e. MSB, LSB and XLSB) starting from register 0xF6
